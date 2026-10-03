@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'SutonnyMJ';
+    src: url('/fonts/SutonnyMJ.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Kalpurush';
+    src: url('/fonts/Kalpurush.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Bijoy Font Utility Classes */
+.sutonny-mj, .font-bijoy, .lang-bn_bijoy, [data-lang="bn_bijoy"], .bijoy-text {
+    font-family: 'SutonnyMJ', sans-serif !important;
+}
+
+.lang-bn_bijoy *, [data-lang="bn_bijoy"] * {
+    font-family: 'SutonnyMJ', sans-serif !important;
+}
+
+/* Unicode Bangla Font Utility Classes */
+.kalpurush, .font-unicode, .lang-bn_unicode, [data-lang="bn_unicode"], .unicode-text {
+    font-family: 'Kalpurush', 'Hind Siliguri', sans-serif !important;
+}
+
+.lang-bn_unicode *, [data-lang="bn_unicode"] * {
+    font-family: 'Kalpurush', 'Hind Siliguri', sans-serif !important;
+}

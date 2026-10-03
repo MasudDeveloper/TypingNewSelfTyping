@@ -1,0 +1,483 @@
+@extends('layouts.student')
+
+@section('title', 'সাবস্ক্রিপশন ও ওয়ালেট রিচার্জ - SelfTyping.com')
+
+@push('styles')
+<style>
+    .packages-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Top Wallet & Recharge Section */
+    .recharge-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 1.8rem;
+    }
+
+    .panel-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .panel-card h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .panel-subtitle {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    /* Method Selector Pills */
+    .method-selector {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .method-pill {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+    .method-pill:hover { border-color: var(--primary); background: #eff6ff; }
+    .method-pill.active {
+        border-color: var(--primary);
+        background: #eff6ff;
+        box-shadow: 0 0 0 2px var(--primary);
+    }
+    .method-pill strong { font-size: 0.95rem; color: var(--text-dark); }
+    .method-pill span { font-size: 0.72rem; color: var(--text-muted); }
+
+    .payment-instruction-box {
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+    .number-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 8px 0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--primary);
+        font-family: monospace;
+    }
+    .btn-copy {
+        background: #eff6ff;
+        color: var(--primary);
+        border: 1px solid #bfdbfe;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .form-group { margin-bottom: 1.2rem; }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: var(--text-dark); }
+    .form-control {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: 0.2s;
+    }
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    }
+
+    .btn-recharge {
+        width: 100%;
+        padding: 0.9rem;
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-recharge:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+
+    /* Current Subscription & Balance Card */
+    .wallet-status-card {
+        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        color: white;
+        border-radius: 16px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .wallet-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .wallet-header .label { font-size: 0.85rem; color: #bfdbfe; font-weight: 600; text-transform: uppercase; }
+    .wallet-balance-val { font-size: 3rem; font-weight: 800; font-family: monospace; line-height: 1; margin: 10px 0; }
+    
+    .subscription-expiry-box {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    /* Packages Cards Grid */
+    .packages-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    .package-card {
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.2s;
+        position: relative;
+    }
+    .package-card:hover {
+        border-color: var(--primary);
+        box-shadow: 0 10px 25px -5px rgba(37,99,235,0.1);
+        transform: translateY(-4px);
+    }
+    .package-card.featured {
+        border-color: var(--primary);
+        box-shadow: 0 10px 25px -5px rgba(37,99,235,0.15);
+    }
+    .popular-tag {
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        background: var(--primary);
+        color: white;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .package-card h4 { font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin-bottom: 4px; }
+    .package-price {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--primary);
+        margin: 1rem 0;
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        font-family: monospace;
+    }
+    .package-price span { font-size: 0.95rem; color: var(--text-muted); font-family: inherit; font-weight: 500; }
+    
+    .package-features { list-style: none; margin-bottom: 1.8rem; flex: 1; }
+    .package-features li { display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: var(--text-muted); margin-bottom: 10px; }
+    .package-features li i { color: var(--success); font-size: 1.1rem; }
+
+    .btn-buy {
+        width: 100%;
+        padding: 0.85rem;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        font-size: 0.95rem;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    .btn-buy.active-btn { background: var(--primary); color: white; }
+    .btn-buy.active-btn:hover { background: var(--primary-hover); }
+
+    /* Transactions Table */
+    .table-container {
+        overflow-x: auto;
+    }
+    .trx-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.9rem;
+    }
+    .trx-table th {
+        background: #f8fafc;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+    .trx-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-dark);
+    }
+    .badge-status {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    .badge-status.completed { background: #d1fae5; color: #065f46; }
+    .badge-status.pending { background: #fef3c7; color: #92400e; }
+    .badge-status.failed { background: #fee2e2; color: #991b1b; }
+</style>
+@endpush
+
+@section('content')
+
+    <div class="packages-container">
+        
+        @if(session('success'))
+            <div style="padding: 1.2rem; background: #ecfdf5; color: #065f46; border: 1.5px solid #a7f3d0; border-radius: 12px; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                <i class="ph-fill ph-check-circle" style="font-size:1.4rem;"></i>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div style="padding: 1.2rem; background: #fef2f2; color: #991b1b; border: 1.5px solid #fecaca; border-radius: 12px; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                <i class="ph-fill ph-warning-circle" style="font-size:1.4rem;"></i>
+                {{ session('error') }}
+            </div>
+        @endif
+
+        <!-- Recharge & Wallet Section -->
+        <div class="recharge-grid">
+            
+            <!-- Recharge Form Panel -->
+            <div class="panel-card">
+                <h3><i class="ph-fill ph-wallet" style="color:var(--primary);"></i> ওয়ালেট রিচার্জ (Instant Gateway)</h3>
+                <p class="panel-subtitle">বিকাশ, নগদ বা রকেটে টাকা পাঠিয়ে TrxID দিলে স্বয়ংক্রিয়ভাবে ব্যালেন্স যোগ হবে।</p>
+
+                <!-- Method Selector -->
+                <div class="method-selector">
+                    <div class="method-pill active" onclick="selectMethod('bkash', '01700-000000', this)">
+                        <strong>bKash</strong>
+                        <span>Personal</span>
+                    </div>
+                    <div class="method-pill" onclick="selectMethod('nagad', '01700-000000', this)">
+                        <strong>Nagad</strong>
+                        <span>Personal</span>
+                    </div>
+                    <div class="method-pill" onclick="selectMethod('rocket', '01700-000000-8', this)">
+                        <strong>Rocket</strong>
+                        <span>Personal</span>
+                    </div>
+                    <div class="method-pill" onclick="selectMethod('upay', '01700-000000', this)">
+                        <strong>Upay</strong>
+                        <span>Personal</span>
+                    </div>
+                </div>
+
+                <!-- Payment Instruction Box -->
+                <div class="payment-instruction-box">
+                    <div>১. আপনার <strong id="selected-method-name">bKash</strong> অ্যাপ বা ডায়াল থেকে <strong>Send Money</strong> করুন:</div>
+                    <div class="number-display">
+                        <span id="merchant-phone">01700-000000</span>
+                        <button type="button" class="btn-copy" onclick="copyNumber()">কপি করুন</button>
+                    </div>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">২. টাকা পাঠানোর পর পাওয়া ফিরতি এসএমএস এর <strong>TrxID</strong> নিচে দিয়ে রিচার্জ বাটনে ক্লিক করুন।</div>
+                </div>
+
+                <!-- Recharge Submission Form -->
+                <form action="{{ route('wallet.recharge') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="method" id="input-method" value="bKash">
+
+                    <div class="form-group">
+                        <label>টাকার পরিমাণ (BDT)</label>
+                        <input type="number" name="amount" class="form-control" placeholder="যেমন: 200, 500" required min="10">
+                    </div>
+
+                    <div class="form-group">
+                        <label>ট্রানজেকশন আইডি (TrxID)</label>
+                        <input type="text" name="transaction_id" class="form-control" placeholder="যেমন: 9K28X9LA" required style="font-family:monospace; text-transform:uppercase;">
+                    </div>
+
+                    <button type="submit" class="btn-recharge">
+                        <i class="ph-bold ph-lightning"></i> ইনস্ট্যান্ট রিচার্জ ভেরিফাই করুন
+                    </button>
+                </form>
+            </div>
+
+            <!-- Current Wallet Status Card -->
+            <div class="wallet-status-card">
+                <div>
+                    <div class="wallet-header">
+                        <div>
+                            <div class="label">বর্তমান ওয়ালেট ব্যালেন্স</div>
+                            <div class="wallet-balance-val">{{ auth()->user()->wallet_balance ?? 0 }} ৳</div>
+                        </div>
+                        <i class="ph-fill ph-coins" style="font-size:3rem; color:#93c5fd;"></i>
+                    </div>
+
+                    <p style="color:#dbeafe; font-size:0.92rem; line-height:1.5;">
+                        যেকোনো সাবস্ক্রিপশন প্যাকেজ কেনার জন্য এই ওয়ালেট ব্যালেন্স ব্যবহার করা যাবে।
+                    </p>
+                </div>
+
+                <div class="subscription-expiry-box">
+                    <div style="font-size:0.8rem; color:#bfdbfe; text-transform:uppercase; font-weight:700;">সাবস্ক্রিপশন স্ট্যাটাস</div>
+                    @if(auth()->user()->subscription_expires_at && auth()->user()->subscription_expires_at > now())
+                        <div style="font-size:1.15rem; font-weight:800; color:#34d399; margin:4px 0;">
+                            সক্রিয় (Active)
+                        </div>
+                        <div style="font-size:0.85rem; color:#e0e7ff;">
+                            মেয়াদ শেষ: {{ auth()->user()->subscription_expires_at->format('d M Y') }} ({{ auth()->user()->subscription_expires_at->diffInDays(now()) }} দিন বাকি)
+                        </div>
+                    @else
+                        <div style="font-size:1.15rem; font-weight:800; color:#f87171; margin:4px 0;">
+                            নিষ্ক্রিয় (No Active Package)
+                        </div>
+                        <div style="font-size:0.85rem; color:#e0e7ff;">
+                            ল্যাবগুলো আনলক করতে নিচের যেকোনো প্যাকেজ বাছাই করুন।
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Packages Selection Grid -->
+        <h3 style="font-size:1.3rem; font-weight:700; color:var(--text-dark); margin-top:1rem;">
+            <i class="ph-fill ph-crown" style="color:#f59e0b;"></i> সাবস্ক্রিপশন প্যাকেজসমূহ
+        </h3>
+
+        <div class="packages-grid">
+            @foreach($packages as $package)
+                <div class="package-card {{ $loop->iteration == 2 ? 'featured' : '' }}">
+                    @if($loop->iteration == 2)
+                        <span class="popular-tag">সেরা অফার</span>
+                    @endif
+
+                    <h4>{{ $package->name }}</h4>
+                    <p style="color:var(--text-muted); font-size:0.88rem;">বিসিসি ও সরকারি নিয়োগ পরীক্ষার জন্য</p>
+                    
+                    <div class="package-price">
+                        ৳{{ $package->price }}
+                        <span>/ {{ $package->duration_days }} দিন</span>
+                    </div>
+
+                    <ul class="package-features">
+                        <li><i class="ph-bold ph-check"></i> ৫০+ সরকারি ও বিসিসি ল্যাব আনলক</li>
+                        <li><i class="ph-bold ph-check"></i> বাংলা (বিজয় ও ইউনিকোড) ও ইংরেজি</li>
+                        <li><i class="ph-bold ph-check"></i> শীট মোড ও স্ক্রিন মোড প্র্যাকটিস</li>
+                        <li><i class="ph-bold ph-check"></i> সরকারি ফরম্যাটে মার্কশিট প্রিন্ট</li>
+                        <li><i class="ph-bold ph-check"></i> আনলিমিটেড পরীক্ষা ও রেজাল্ট হিস্ট্রি</li>
+                    </ul>
+
+                    <form action="{{ route('packages.purchase', $package->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn-buy active-btn" onclick="return confirm('আপনি কি নিশ্চিত যে {{ $package->name }} প্যাকেজটি কিনতে চান?')">
+                            <i class="ph-bold ph-shopping-cart-simple"></i> প্যাকেজটি সক্রিয় করুন
+                        </button>
+                    </form>
+                </div>
+            @endforeach
+        </div>
+
+        <!-- Recent Transactions History -->
+        @if(isset($userTransactions) && $userTransactions->count() > 0)
+            <div class="panel-card" style="margin-top:1.5rem;">
+                <h3><i class="ph-fill ph-receipt"></i> সাম্প্রতিক ট্রানজেকশন হিস্ট্রি</h3>
+                
+                <div class="table-container" style="margin-top:1rem;">
+                    <table class="trx-table">
+                        <thead>
+                            <tr>
+                                <th>তারিখ</th>
+                                <th>বিবরণ</th>
+                                <th>পরিমাণ</th>
+                                <th>ধরন</th>
+                                <th>স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($userTransactions as $trx)
+                                <tr>
+                                    <td>{{ $trx->created_at->format('d M Y, h:i A') }}</td>
+                                    <td>{{ $trx->description }}</td>
+                                    <td style="font-weight:700; font-family:monospace;">{{ $trx->amount }} ৳</td>
+                                    <td>{{ strtoupper($trx->type) }}</td>
+                                    <td>
+                                        <span class="badge-status {{ $trx->status }}">
+                                            {{ $trx->status === 'completed' ? 'সফল' : ($trx->status === 'pending' ? 'যাচাই চলছে' : 'বাতিল') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+
+    </div>
+
+    <script>
+        const merchantNumbers = {
+            bkash: '01700-000000',
+            nagad: '01700-000000',
+            rocket: '01700-000000-8',
+            upay: '01700-000000'
+        };
+
+        function selectMethod(method, num, el) {
+            document.querySelectorAll('.method-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+
+            document.getElementById('input-method').value = method;
+            document.getElementById('selected-method-name').innerText = method.toUpperCase();
+            document.getElementById('merchant-phone').innerText = merchantNumbers[method] || num;
+        }
+
+        function copyNumber() {
+            const num = document.getElementById('merchant-phone').innerText.trim();
+            navigator.clipboard.writeText(num).then(() => {
+                alert('নম্বর কপি করা হয়েছে: ' + num);
+            });
+        }
+    </script>
+
+@endsection
