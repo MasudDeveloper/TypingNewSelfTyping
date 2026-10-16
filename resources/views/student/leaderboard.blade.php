@@ -1,87 +1,215 @@
 @extends('layouts.student')
 
-@section('title', 'Winner Best Top 10 - SelfTyping.com')
+@section('title', 'Winner Best Top 10 Leaderboard - SelfTyping.com')
 
 @push('styles')
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     .leaderboard-container {
-        font-family: 'Hind Siliguri', 'Inter', sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
     }
 
-    /* Podium Layout */
+    /* Minimalist Modern Header Banner */
+    .leaderboard-header {
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.35) 0%, rgba(14, 21, 38, 0.9) 100%);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        border-radius: 20px;
+        padding: 2.2rem 2.5rem;
+        backdrop-filter: blur(16px);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .leaderboard-header::after {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -5%;
+        width: 250px;
+        height: 250px;
+        background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+        pointer-events: none;
+    }
+    .header-text h1 {
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: -0.5px;
+    }
+    .header-text p {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        margin-top: 6px;
+    }
+    .trophy-badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: white;
+        box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+        flex-shrink: 0;
+    }
+
+    /* Minimalist Filter Navigation */
+    .filter-bar {
+        background: rgba(14, 21, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 0.85rem 1.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        backdrop-filter: blur(14px);
+    }
+
+    .time-pills {
+        display: flex;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 4px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .time-pill {
+        padding: 6px 16px;
+        border-radius: 9px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #94a3b8;
+        transition: all 0.2s ease;
+    }
+    .time-pill:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.06);
+    }
+    .time-pill.active {
+        background: var(--primary);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .category-filter-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .category-filter-box label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #94a3b8;
+    }
+    .cyber-select {
+        padding: 7px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.88rem;
+        background: #090e1a;
+        color: #ffffff;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cyber-select:focus {
+        border-color: var(--primary);
+    }
+
+    /* Podium Layout (Top 3) */
     .podium-section {
         display: flex;
         justify-content: center;
         align-items: flex-end;
         gap: 1.5rem;
-        margin: 2.5rem 0 3rem 0;
+        margin: 1rem 0;
         padding: 0 1rem;
     }
 
     .podium-card {
-        background: var(--bg-surface);
-        border: 2px solid var(--border);
+        background: rgba(14, 21, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 20px;
-        padding: 1.75rem 1.25rem;
+        padding: 2rem 1.5rem;
         text-align: center;
-        width: 240px;
+        width: 250px;
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
-        transition: transform 0.2s;
+        backdrop-filter: blur(14px);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
     }
-
-    .podium-card:hover { transform: translateY(-4px); }
+    .podium-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 35px -10px rgba(0, 0, 0, 0.8);
+    }
 
     .podium-1 {
         order: 2;
-        border-color: #f59e0b;
-        background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
-        box-shadow: 0 15px 35px rgba(245, 158, 11, 0.15);
-        padding-top: 2.5rem;
+        border-color: rgba(245, 158, 11, 0.5);
+        background: linear-gradient(180deg, rgba(245, 158, 11, 0.12) 0%, rgba(14, 21, 38, 0.95) 100%);
+        box-shadow: 0 15px 40px -10px rgba(245, 158, 11, 0.25);
+        padding-top: 2.8rem;
         padding-bottom: 2.5rem;
     }
-
     .podium-2 {
         order: 1;
-        border-color: #94a3b8;
-        background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-        box-shadow: 0 10px 25px rgba(148, 163, 184, 0.12);
+        border-color: rgba(148, 163, 184, 0.3);
+        background: linear-gradient(180deg, rgba(148, 163, 184, 0.08) 0%, rgba(14, 21, 38, 0.9) 100%);
     }
-
     .podium-3 {
         order: 3;
-        border-color: #d97706;
-        background: linear-gradient(180deg, #fef3c7 0%, #ffffff 100%);
-        box-shadow: 0 10px 25px rgba(217, 119, 6, 0.1);
+        border-color: rgba(217, 119, 6, 0.3);
+        background: linear-gradient(180deg, rgba(217, 119, 6, 0.08) 0%, rgba(14, 21, 38, 0.9) 100%);
     }
 
     .avatar-wrapper {
         position: relative;
-        margin-bottom: 1rem;
+        margin-bottom: 1.1rem;
     }
-
     .avatar-circle {
         width: 72px;
         height: 72px;
         border-radius: 50%;
-        background: #e2e8f0;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 800;
         font-size: 1.5rem;
-        color: var(--primary);
-        border: 3px solid white;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        color: #ffffff;
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+    .podium-1 .avatar-circle {
+        width: 84px;
+        height: 84px;
+        border-color: #f59e0b;
+        font-size: 1.8rem;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
     }
 
     .rank-badge {
         position: absolute;
-        bottom: -6px;
-        right: -6px;
+        bottom: -4px;
+        right: -4px;
         width: 28px;
         height: 28px;
         border-radius: 50%;
@@ -91,128 +219,176 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border: 2px solid white;
+        border: 2px solid #0e1526;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
     }
-
-    .rank-1-badge { background: #f59e0b; }
+    .rank-1-badge { background: #f59e0b; width: 32px; height: 32px; font-size: 0.95rem; }
     .rank-2-badge { background: #94a3b8; }
-    .rank-3-badge { background: #b45309; }
+    .rank-3-badge { background: #d97706; }
+
+    .podium-champion-pill {
+        position: absolute;
+        top: -14px;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+    }
 
     .podium-name {
         font-size: 1.15rem;
-        font-weight: 700;
-        color: var(--text-dark);
+        font-weight: 800;
+        color: #ffffff;
         margin-bottom: 0.25rem;
     }
-
-    .podium-speed {
-        font-size: 2rem;
-        font-weight: 900;
-        color: var(--primary);
-        line-height: 1;
-        margin: 0.5rem 0;
-    }
-
-    .podium-wpm-label {
+    .podium-sub {
         font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase;
+        color: #94a3b8;
+    }
+    .podium-speed {
+        font-size: 2.2rem;
+        font-weight: 900;
+        color: #38bdf8;
+        font-family: var(--font-en);
+        line-height: 1;
+        margin: 0.75rem 0 0.35rem 0;
+    }
+    .podium-1 .podium-speed {
+        color: #fbbf24;
+        font-size: 2.6rem;
+    }
+    .podium-wpm-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #cbd5e1;
     }
 
-    /* Filters Bar */
-    .filter-bar {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 1rem 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-
-    .time-pills {
-        display: flex;
-        gap: 6px;
-    }
-
-    .time-pill {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        color: var(--text-muted);
-        background: #f1f5f9;
-        transition: 0.2s;
-    }
-
-    .time-pill.active, .time-pill:hover {
-        background: var(--primary);
-        color: white;
-    }
-
-    /* Table Styling */
+    /* Minimalist Dark Table Card */
     .leaderboard-table-card {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
+        background: rgba(14, 21, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        backdrop-filter: blur(14px);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }
-
     .styled-table {
         width: 100%;
         border-collapse: collapse;
         text-align: left;
     }
-
     .styled-table th {
-        background: #f8fafc;
-        padding: 1rem 1.25rem;
-        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 1rem 1.4rem;
+        font-size: 0.8rem;
         font-weight: 700;
-        color: var(--text-muted);
+        color: #94a3b8;
         text-transform: uppercase;
-        border-bottom: 1px solid var(--border);
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-
     .styled-table td {
-        padding: 1.1rem 1.25rem;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 0.95rem;
-        color: var(--text-dark);
+        padding: 1.15rem 1.4rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        font-size: 0.92rem;
+        color: #cbd5e1;
+    }
+    .styled-table tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+    }
+    .styled-table tr:last-child td {
+        border-bottom: none;
     }
 
-    .styled-table tr:last-child td { border-bottom: none; }
-    .styled-table tr:hover { background: #fbfcfe; }
+    .user-col {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .user-mini-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(37, 99, 235, 0.15);
+        color: #60a5fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.85rem;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
 
-    @media (max-width: 768px) {
+    .speed-badge {
+        background: rgba(56, 189, 248, 0.12);
+        color: #38bdf8;
+        padding: 5px 12px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.95rem;
+        font-family: var(--font-en);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        display: inline-block;
+    }
+
+    .accuracy-tag {
+        font-weight: 700;
+        font-family: var(--font-en);
+    }
+    .accuracy-tag.high { color: #34d399; }
+    .accuracy-tag.mid { color: #fde047; }
+    .accuracy-tag.low { color: #f87171; }
+
+    /* Empty State */
+    .empty-state-box {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94a3b8;
+    }
+    .empty-state-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: #64748b;
+        margin: 0 auto 1.2rem auto;
+    }
+
+    @media (max-width: 900px) {
         .podium-section { flex-direction: column; align-items: center; }
         .podium-card { width: 100%; max-width: 320px; }
         .podium-1 { order: 1; }
         .podium-2 { order: 2; }
         .podium-3 { order: 3; }
+        .leaderboard-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
     }
 </style>
 @endpush
 
 @section('content')
-
 <div class="leaderboard-container">
-    <div style="text-align:center; margin-bottom:2rem;">
-        <h1 style="font-size:2rem; font-weight:900; color:var(--text-dark);">
-            <i class="ph-fill ph-trophy" style="color:#f59e0b;"></i> Winner Best Top 10 Leaderboard
-        </h1>
-        <p style="color:var(--text-muted); font-size:1rem; margin-top:0.35rem;">
-            SelfTyping প্ল্যাটফর্মে সর্বোচ্চ গতি ও শতভাগ নির্ভুলতার সাথে শীর্ষ টাইপিং মাস্টারদের তালিকা
-        </p>
+
+    <!-- Top Header Banner -->
+    <div class="leaderboard-header">
+        <div class="header-text">
+            <h1><i class="ph-fill ph-trophy" style="color:#f59e0b;"></i> Winner Best Top 10 Leaderboard</h1>
+            <p>SelfTyping প্ল্যাটফর্মে সর্বোচ্চ গতি ও শতভাগ নির্ভুলতার সাথে শীর্ষ টাইপিং মাস্টারদের তালিকা।</p>
+        </div>
+        <div class="trophy-badge">
+            <i class="ph-bold ph-medal"></i>
+        </div>
     </div>
 
-    <!-- Filter Bar -->
+    <!-- Filter & Categories Navigation Bar -->
     <div class="filter-bar">
         <div class="time-pills">
             <a href="{{ route('leaderboard.index', ['timeframe' => 'today', 'category' => $category]) }}" class="time-pill {{ $timeframe === 'today' ? 'active' : '' }}">আজকের সেরা</a>
@@ -221,10 +397,10 @@
             <a href="{{ route('leaderboard.index', ['timeframe' => 'all', 'category' => $category]) }}" class="time-pill {{ $timeframe === 'all' ? 'active' : '' }}">সর্বকালের সেরা</a>
         </div>
 
-        <form method="GET" action="{{ route('leaderboard.index') }}" style="display:flex; align-items:center; gap:8px;">
+        <form method="GET" action="{{ route('leaderboard.index') }}" class="category-filter-box">
             <input type="hidden" name="timeframe" value="{{ $timeframe }}">
-            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">ক্যাটাগরি:</label>
-            <select name="category" onchange="this.form.submit()" style="padding:6px 12px; border-radius:8px; border:1px solid var(--border); font-size:0.9rem; background:white; font-weight:600;">
+            <label><i class="ph-bold ph-funnel"></i> ক্যাটাগরি:</label>
+            <select name="category" onchange="this.form.submit()" class="cyber-select">
                 <option value="all" {{ $category === 'all' ? 'selected' : '' }}>সকল ক্যাটাগরি</option>
                 @foreach($categories as $cat)
                     <option value="{{ $cat }}" {{ $category === $cat ? 'selected' : '' }}>{{ $cat }}</option>
@@ -233,7 +409,7 @@
         </form>
     </div>
 
-    <!-- Top 3 Podium -->
+    <!-- Top 3 Podium (If Results Exist) -->
     @if($topResults->count() > 0)
         <div class="podium-section">
             <!-- Rank 2 -->
@@ -244,7 +420,7 @@
                         <div class="rank-badge rank-2-badge">২</div>
                     </div>
                     <div class="podium-name">{{ $topResults[1]->user->name ?? 'পরীক্ষার্থী' }}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">{{ $topResults[1]->typingTest->title ?? 'BCC Test' }}</div>
+                    <div class="podium-sub">{{ $topResults[1]->typingTest->title ?? 'BCC Test' }}</div>
                     <div class="podium-speed">{{ $topResults[1]->net_wpm }}</div>
                     <div class="podium-wpm-label">Net WPM • {{ number_format($topResults[1]->accuracy, 1) }}% নির্ভুল</div>
                 </div>
@@ -253,18 +429,18 @@
             <!-- Rank 1 (Champion) -->
             @if(isset($topResults[0]))
                 <div class="podium-card podium-1">
-                    <div style="position:absolute; top:-18px; background:#f59e0b; color:white; padding:4px 14px; border-radius:20px; font-weight:800; font-size:0.8rem; box-shadow:0 4px 10px rgba(245,158,11,0.3);">
+                    <div class="podium-champion-pill">
                         👑 CHAMPION
                     </div>
                     <div class="avatar-wrapper">
-                        <div class="avatar-circle" style="border-color:#f59e0b; width:82px; height:82px; font-size:1.75rem;">
+                        <div class="avatar-circle">
                             {{ strtoupper(substr($topResults[0]->user->name ?? 'U', 0, 2)) }}
                         </div>
-                        <div class="rank-badge rank-1-badge" style="width:32px; height:32px;">১</div>
+                        <div class="rank-badge rank-1-badge">১</div>
                     </div>
-                    <div class="podium-name" style="font-size:1.3rem;">{{ $topResults[0]->user->name ?? 'পরীক্ষার্থী' }}</div>
-                    <div style="font-size:0.85rem; color:var(--text-muted);">{{ $topResults[0]->typingTest->title ?? 'BCC Test' }}</div>
-                    <div class="podium-speed" style="font-size:2.4rem; color:#d97706;">{{ $topResults[0]->net_wpm }}</div>
+                    <div class="podium-name">{{ $topResults[0]->user->name ?? 'পরীক্ষার্থী' }}</div>
+                    <div class="podium-sub">{{ $topResults[0]->typingTest->title ?? 'BCC Test' }}</div>
+                    <div class="podium-speed">{{ $topResults[0]->net_wpm }}</div>
                     <div class="podium-wpm-label">Net WPM • {{ number_format($topResults[0]->accuracy, 1) }}% নির্ভুল</div>
                 </div>
             @endif
@@ -277,7 +453,7 @@
                         <div class="rank-badge rank-3-badge">৩</div>
                     </div>
                     <div class="podium-name">{{ $topResults[2]->user->name ?? 'পরীক্ষার্থী' }}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">{{ $topResults[2]->typingTest->title ?? 'BCC Test' }}</div>
+                    <div class="podium-sub">{{ $topResults[2]->typingTest->title ?? 'BCC Test' }}</div>
                     <div class="podium-speed">{{ $topResults[2]->net_wpm }}</div>
                     <div class="podium-wpm-label">Net WPM • {{ number_format($topResults[2]->accuracy, 1) }}% নির্ভুল</div>
                 </div>
@@ -303,7 +479,7 @@
             <tbody>
                 @forelse($topResults as $idx => $res)
                     <tr>
-                        <td style="text-align:center; font-weight:800; font-size:1.1rem;">
+                        <td style="text-align:center; font-weight:800; font-size:1.15rem;">
                             @if($idx === 0) 🥇
                             @elseif($idx === 1) 🥈
                             @elseif($idx === 2) 🥉
@@ -311,46 +487,57 @@
                             @endif
                         </td>
                         <td>
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <div style="width:34px; height:34px; border-radius:50%; background:#eff6ff; color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem;">
+                            <div class="user-col">
+                                <div class="user-mini-avatar">
                                     {{ strtoupper(substr($res->user->name ?? 'U', 0, 2)) }}
                                 </div>
                                 <div>
-                                    <div style="font-weight:700;">{{ $res->user->name ?? 'শিক্ষার্থী' }}</div>
-                                    <div style="font-size:0.75rem; color:var(--text-muted);">ID: #{{ $res->user->id ?? 0 }}</div>
+                                    <div style="font-weight:700; color:#ffffff;">{{ $res->user->name ?? 'শিক্ষার্থী' }}</div>
+                                    <div style="font-size:0.75rem; color:#64748b; font-family:var(--font-en);">ID: #{{ $res->user->id ?? 0 }}</div>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div style="font-weight:600;">{{ $res->typingTest->title ?? 'BCC Typing Test' }}</div>
-                            <div style="font-size:0.8rem; color:var(--text-muted);">{{ $res->typingTest->category ?? 'Government' }}</div>
+                            <div style="font-weight:600; color:#ffffff;">{{ $res->typingTest->title ?? 'BCC Typing Test' }}</div>
+                            <div style="font-size:0.78rem; color:#94a3b8;">{{ $res->typingTest->category ?? 'Government' }}</div>
                         </td>
-                        <td style="font-weight:600;">{{ $res->gross_wpm }}</td>
-                        <td style="color:#dc2626; font-weight:600;">{{ $res->errors }} টি</td>
+                        <td style="font-weight:600; font-family:var(--font-en); color:#cbd5e1;">{{ $res->gross_wpm }}</td>
+                        <td style="color:#f87171; font-weight:600; font-family:var(--font-en);">{{ $res->errors }} টি</td>
                         <td>
-                            <span style="background:#eff6ff; color:var(--primary); padding:4px 10px; border-radius:6px; font-weight:800; font-size:1.05rem;">
+                            <span class="speed-badge">
                                 {{ $res->net_wpm }} WPM
                             </span>
                         </td>
                         <td>
-                            <span style="font-weight:700; color:{{ $res->accuracy >= 95 ? '#16a34a' : '#d97706' }};">
+                            <span class="accuracy-tag {{ $res->accuracy >= 95 ? 'high' : ($res->accuracy >= 85 ? 'mid' : 'low') }}">
                                 {{ number_format($res->accuracy, 1) }}%
                             </span>
                         </td>
-                        <td style="color:var(--text-muted); font-size:0.85rem;">
+                        <td style="color:#64748b; font-size:0.85rem; font-family:var(--font-en);">
                             {{ $res->created_at->format('d M Y') }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" style="text-align:center; padding:3rem; color:var(--text-muted);">
-                            কোনো লিডারবোর্ড রেকর্ড পাওয়া যায়নি।
+                        <td colspan="8">
+                            <div class="empty-state-box">
+                                <div class="empty-state-icon">
+                                    <i class="ph-bold ph-trophy"></i>
+                                </div>
+                                <h3 style="font-size:1.15rem; font-weight:700; color:#ffffff; margin-bottom:0.4rem;">কোনো রেকর্ড পাওয়া যায়নি</h3>
+                                <p style="font-size:0.9rem; color:#94a3b8; max-width:400px; margin:0 auto 1.5rem auto;">
+                                    এই ফিল্টারে এখনও কোনো টাইপিং টেস্টের রেকর্ড নেই। ড্যাশবোর্ড থেকে প্রথম টেস্ট সম্পন্ন করে লিডারবোর্ডের শীর্ষে নিজের নাম যুক্ত করুন!
+                                </p>
+                                <a href="{{ route('dashboard') }}" class="time-pill active" style="padding:10px 22px; font-size:0.9rem; display:inline-flex; align-items:center; gap:6px;">
+                                    <i class="ph-bold ph-play"></i> টেস্টে অংশগ্রহণ করুন
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-</div>
 
+</div>
 @endsection

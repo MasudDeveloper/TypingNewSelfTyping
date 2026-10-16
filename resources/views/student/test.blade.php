@@ -158,6 +158,46 @@
             100% { transform: scale(0.9); opacity: 0.7; }
         }
 
+        /* Keyboard Input Mode Switcher */
+        .input-mode-switcher {
+            display: flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 4px;
+        }
+        .input-mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .input-mode-btn.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+        }
+        .input-mode-btn:hover:not(.active) {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .font-sutonny {
+            font-family: 'SutonnyMJ', sans-serif !important;
+        }
+        .font-kalpurush {
+            font-family: 'Kalpurush', sans-serif !important;
+        }
+
         /* Container */
         .exam-container {
             max-width: 1100px;
@@ -172,8 +212,8 @@
         /* Stats Bar */
         .stats-bar {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.2rem;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
             margin-bottom: 1.5rem;
         }
         .stat-card {
@@ -207,16 +247,28 @@
         @keyframes blink { 50% { opacity: 0.6; } }
 
         /* Fonts for Bengali & English */
-        .lang-bn_unicode, .lang-bn_unicode *, .lang-bn_unicode .word,
-        .lang-bn_bijoy, .lang-bn_bijoy *, .lang-bn_bijoy .word { 
+        .lang-bn_unicode, .lang-bn_unicode .word,
+        .lang-bn_bijoy, .lang-bn_bijoy .word { 
             font-family: 'Kalpurush', 'Hind Siliguri', 'Nikosh', sans-serif !important; 
             font-size: 1.55rem; 
             line-height: 1.9; 
         }
-        .single-line-input.lang-bn_bijoy, .single-line-input.lang-bn_unicode,
-        .sheet-textarea.lang-bn_bijoy, .sheet-textarea.lang-bn_unicode {
-            font-family: 'Kalpurush', 'Hind Siliguri', 'SutonnyMJ', sans-serif !important;
+        .single-line-input, .sheet-textarea {
+            font-family: 'Kalpurush', 'Hind Siliguri', sans-serif !important;
             font-size: 1.45rem;
+        }
+        .single-line-input.font-sutonny,
+        .sheet-textarea.font-sutonny,
+        textarea.font-sutonny,
+        input.font-sutonny {
+            font-family: 'SutonnyMJ', sans-serif !important;
+            font-size: 1.6rem !important;
+            letter-spacing: 0.5px;
+        }
+        .single-line-input.font-kalpurush,
+        .sheet-textarea.font-kalpurush {
+            font-family: 'Kalpurush', 'Hind Siliguri', sans-serif !important;
+            font-size: 1.45rem !important;
         }
         .lang-en, .lang-en *, .lang-en .word, .lang-en input, .lang-en textarea { 
             font-family: 'Inter', monospace !important; 
@@ -523,6 +575,18 @@
         </div>
 
         <div class="header-badges">
+            @if(in_array($test->language, ['bn_unicode', 'bn_bijoy']))
+                <!-- User Keyboard Choice Switcher -->
+                <div class="input-mode-switcher" id="header-input-switcher" title="আপনার কিবোর্ডের টাইপিং মেথড বেছে নিন">
+                    <button type="button" class="input-mode-btn active" id="btn-mode-unicode" onclick="switchKeyboardMode('unicode')">
+                        <i class="ph-bold ph-keyboard"></i> ইউনিকোড (Ctrl+Alt+V)
+                    </button>
+                    <button type="button" class="input-mode-btn" id="btn-mode-bijoy" onclick="switchKeyboardMode('bijoy')">
+                        <i class="ph-bold ph-font"></i> বিজয় ক্লাসিক (Ctrl+Alt+B)
+                    </button>
+                </div>
+            @endif
+
             <span class="mode-pill {{ $test->mode }}">{{ strtoupper($test->mode) }} মোড</span>
             <div class="proctor-status">
                 <span class="pulse-dot"></span>
@@ -540,16 +604,20 @@
                 <div class="stat-val timer" id="time-display">{{ $test->time_limit_minutes }}:00</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Gross WPM</div>
+                <div class="stat-label">Gross WPM (5-Key)</div>
                 <div class="stat-val" id="gross-wpm-display">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">অ্যাকুরেসি (%)</div>
+                <div class="stat-label">Net WPM (বিসিসি)</div>
+                <div class="stat-val" style="color:#38bdf8;" id="net-wpm-display">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">অ্যাকুরেসি (Accuracy)</div>
                 <div class="stat-val" style="color:var(--success);" id="acc-display">100%</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">ভুলের সংখ্যা</div>
-                <div class="stat-val" style="color:var(--danger);" id="error-display">0</div>
+                <div class="stat-label">ভুলের হার (Max 5%)</div>
+                <div class="stat-val" style="color:var(--danger);" id="error-rate-display">0%</div>
             </div>
         </div>
 
@@ -563,6 +631,24 @@
                     <h3>বিসিসি ও সরকারি পরীক্ষা শুরু করুন</h3>
                     <p>এটি একটি সরকারি ও বিসিসি স্ট্যান্ডার্ড মূল্যায়ন পরীক্ষা। পরীক্ষায় শতভাগ নির্ভুলতার সাথে টাইপ করুন।</p>
                     
+                    @if(in_array($test->language, ['bn_unicode', 'bn_bijoy']))
+                        <div style="background:rgba(37,99,235,0.12); border:1px solid rgba(59,130,246,0.3); border-radius:12px; padding:12px; margin:1rem 0; text-align:left;">
+                            <label style="font-size:0.85rem; font-weight:700; color:#93c5fd; display:block; margin-bottom:6px;">
+                                <i class="ph-bold ph-keyboard"></i> আপনার টাইপিং কিবোর্ড লেআউট নির্বাচন করুন:
+                            </label>
+                            <div style="display:flex; gap:10px;">
+                                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem; color:white;">
+                                    <input type="radio" name="modal_kb_mode" value="unicode" checked onchange="switchKeyboardMode('unicode')">
+                                    <span>ইউনিকোড (Avro / UniJoy - Ctrl+Alt+V)</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem; color:white;">
+                                    <input type="radio" name="modal_kb_mode" value="bijoy" onchange="switchKeyboardMode('bijoy')">
+                                    <span>বিজয় ক্লাসিক (SutonnyMJ - Ctrl+Alt+B)</span>
+                                </label>
+                            </div>
+                        </div>
+                    @endif
+
                     <ul class="overlay-rules">
                         <li><i class="ph-bold ph-check"></i> মোট সময়: <strong>{{ $test->time_limit_minutes }} মিনিট</strong> | পাসিং স্পিড: <strong>{{ $test->pass_wpm }} WPM</strong></li>
                         <li><i class="ph-bold ph-warning"></i> সরকারি নিয়মে সর্বোচ্চ <strong>৫% ভুল</strong> ক্ষমার যোগ্য।</li>
@@ -587,7 +673,7 @@
                     </div>
 
                     <div class="sheet-typing-pane">
-                        <textarea id="sheet-input" class="sheet-textarea lang-{{ $test->language }}" placeholder="এখানে দেখে দেখে সম্পূর্ণ প্যাসেজটি নির্ভুলভাবে টাইপ করুন..." autocomplete="off" spellcheck="false" oncopy="return false" oncut="return false" onpaste="return false"></textarea>
+                        <textarea id="sheet-input" class="sheet-textarea font-kalpurush" placeholder="এখানে দেখে দেখে সম্পূর্ণ প্যাসেজটি নির্ভুলভাবে টাইপ করুন..." autocomplete="off" spellcheck="false" oncopy="return false" oncut="return false" onpaste="return false"></textarea>
                     </div>
                 </div>
             @else
@@ -596,7 +682,7 @@
                     <!-- Words rendered via JS -->
                 </div>
                 <div class="screen-input-area">
-                    <input type="text" id="screen-input" class="single-line-input lang-{{ $test->language }}" placeholder="টাইপ করা শুরু করুন..." autocomplete="off" spellcheck="false" oncopy="return false" oncut="return false" onpaste="return false">
+                    <input type="text" id="screen-input" class="single-line-input font-kalpurush" placeholder="টাইপ করা শুরু করুন..." autocomplete="off" spellcheck="false" oncopy="return false" oncut="return false" onpaste="return false">
                 </div>
             @endif
 
@@ -604,10 +690,10 @@
 
         <!-- Bottom Action Bar -->
         <div class="bottom-actions">
-            <span style="font-size:0.85rem; color:var(--text-muted);">
-                <i class="ph ph-info"></i> নির্দিষ্ট সময় শেষ হলে স্বয়ংক্রিয়ভাবে খাতা জমা হয়ে যাবে।
+            <span style="font-size:0.85rem; color:var(--text-muted);" id="exam-status-hint">
+                <i class="ph ph-info"></i> পরীক্ষা শুরু হলে টাইপ করুন। নির্দিষ্ট সময় শেষ হলে স্বয়ংক্রিয়ভাবে খাতা জমা হয়ে যাবে।
             </span>
-            <button class="btn-submit-exam" id="btn-submit-exam">
+            <button class="btn-submit-exam" id="btn-submit-exam" style="display:none;">
                 <i class="ph-bold ph-paper-plane-tilt"></i> পরীক্ষা সম্পন্ন করুন (Submit)
             </button>
         </div>
@@ -668,6 +754,63 @@
         let correctWords = 0;
         let wrongWords = 0;
         let totalCorrectCharacters = 0;
+        let typedWordsHistory = [];
+        let screenTokensHistory = [];
+
+        // Current Selected Keyboard Mode ('unicode' or 'bijoy')
+        let activeKeyboardMode = "{{ $test->language === 'bn_bijoy' ? 'bijoy' : 'unicode' }}";
+
+        function switchKeyboardMode(mode) {
+            activeKeyboardMode = mode;
+
+            // Update Header Switcher Buttons
+            const btnUni = document.getElementById('btn-mode-unicode');
+            const btnBijoy = document.getElementById('btn-mode-bijoy');
+            if (btnUni && btnBijoy) {
+                if (mode === 'unicode') {
+                    btnUni.classList.add('active');
+                    btnBijoy.classList.remove('active');
+                } else {
+                    btnBijoy.classList.add('active');
+                    btnUni.classList.remove('active');
+                }
+            }
+
+            // Sync Modal Radio
+            const radios = document.getElementsByName('modal_kb_mode');
+            radios.forEach(r => {
+                if (r.value === mode) r.checked = true;
+            });
+
+            // Adjust input font family according to mode
+            if (screenInput) {
+                if (mode === 'bijoy') {
+                    screenInput.classList.remove('font-kalpurush');
+                    screenInput.classList.add('font-sutonny');
+                    screenInput.style.fontFamily = "'SutonnyMJ', sans-serif";
+                    screenInput.placeholder = "বিজয় বায়ান্ন দিয়ে টাইপ করুন (Ctrl+Alt+B)...";
+                } else {
+                    screenInput.classList.remove('font-sutonny');
+                    screenInput.classList.add('font-kalpurush');
+                    screenInput.style.fontFamily = "'Kalpurush', 'Hind Siliguri', sans-serif";
+                    screenInput.placeholder = "ইউনিকোড / অভ্র দিয়ে টাইপ করুন (Ctrl+Alt+V)...";
+                }
+            }
+
+            if (sheetInput) {
+                if (mode === 'bijoy') {
+                    sheetInput.classList.remove('font-kalpurush');
+                    sheetInput.classList.add('font-sutonny');
+                    sheetInput.style.fontFamily = "'SutonnyMJ', sans-serif";
+                    sheetInput.placeholder = "বিজয় বায়ান্ন দিয়ে দেখে দেখে সম্পূর্ণ প্যাসেজ টাইপ করুন (Ctrl+Alt+B)...";
+                } else {
+                    sheetInput.classList.remove('font-sutonny');
+                    sheetInput.classList.add('font-kalpurush');
+                    sheetInput.style.fontFamily = "'Kalpurush', 'Hind Siliguri', sans-serif";
+                    sheetInput.placeholder = "ইউনিকোড / অভ্র দিয়ে দেখে দেখে সম্পূর্ণ প্যাসেজ টাইপ করুন (Ctrl+Alt+V)...";
+                }
+            }
+        }
 
         // Initialize Test
         function initEngine() {
@@ -683,12 +826,16 @@
                     wordElements.push(span);
                 });
             }
+            switchKeyboardMode(activeKeyboardMode);
         }
 
         // Start Test
         function startExam() {
             if (isStarted) return;
             isStarted = true;
+
+            // Show submit button once exam starts
+            if (btnSubmitExam) btnSubmitExam.style.display = 'inline-flex';
 
             // Request Fullscreen
             if (document.documentElement.requestFullscreen) {
@@ -724,25 +871,44 @@
             }
         }
 
+        const netWpmDisplay = document.getElementById('net-wpm-display');
+        const errorRateDisplay = document.getElementById('error-rate-display');
+
         function updateLiveStats() {
             const timeElapsed = (timeLimitSeconds - timeRemaining) / 60;
             if (timeElapsed <= 0) return;
 
             if (testMode === 'screen') {
+                // Official 5 Keystroke Rule for Gross WPM
                 const grossWpm = totalKeystrokes > 0 
                     ? Math.round((totalKeystrokes / 5) / timeElapsed) 
                     : Math.round((correctWords + wrongWords) / timeElapsed);
                 grossWpmDisplay.innerText = grossWpm;
 
+                // BCC Net WPM Formula: Gross WPM - (Errors / TimeElapsed)
+                const errorPenalty = Math.round(wrongWords / timeElapsed);
+                const netWpm = Math.max(0, grossWpm - errorPenalty);
+                if (netWpmDisplay) netWpmDisplay.innerText = netWpm;
+
                 const totalAttempted = correctWords + wrongWords;
                 const acc = totalAttempted === 0 ? 100 : Math.round((correctWords / totalAttempted) * 100);
                 accDisplay.innerText = acc + '%';
-                errorDisplay.innerText = wrongWords;
+
+                const errorRate = totalAttempted === 0 ? 0 : ((wrongWords / totalAttempted) * 100).toFixed(1);
+                if (errorRateDisplay) {
+                    errorRateDisplay.innerText = errorRate + '%';
+                    if (parseFloat(errorRate) > 5.0) {
+                        errorRateDisplay.style.color = '#ef4444';
+                    } else {
+                        errorRateDisplay.style.color = '#34d399';
+                    }
+                }
             } else if (testMode === 'sheet' && sheetInput) {
                 const text = sheetInput.value.trim();
                 const charCount = text.length;
                 const grossWpm = Math.round((charCount / 5) / timeElapsed);
                 grossWpmDisplay.innerText = grossWpm > 0 ? grossWpm : 0;
+                if (netWpmDisplay) netWpmDisplay.innerText = grossWpm > 0 ? grossWpm : 0;
             }
         }
 
@@ -775,6 +941,8 @@
                 payload.wrong_words = wrongWords;
                 payload.total_errors = wrongWords;
                 payload.total_words = correctWords + wrongWords;
+                payload.typed_text = typedWordsHistory.join(' ');
+                payload.evaluation_details = JSON.stringify(screenTokensHistory);
             }
 
             fetch(submitUrl, {
@@ -909,13 +1077,24 @@
                     const typedWord = typedValue.trim();
                     const isCorrect = matchesWord(typedWord, targetWord);
 
+                    let finalSavedWord = typedWord;
+                    if (activeKeyboardMode === 'bijoy' && window.convertBijoyToUnicode) {
+                        try {
+                            const converted = window.convertBijoyToUnicode(typedWord);
+                            if (converted && converted.trim()) finalSavedWord = converted;
+                        } catch(e) {}
+                    }
+                    typedWordsHistory.push(finalSavedWord);
+
                     if (isCorrect) {
                         wordElements[currentWordIndex].className = 'word correct';
                         correctWords++;
                         totalCorrectCharacters += targetWord.length + 1;
+                        screenTokensHistory.push({ type: 'correct', word: finalSavedWord });
                     } else {
                         wordElements[currentWordIndex].className = 'word incorrect';
                         wrongWords++;
+                        screenTokensHistory.push({ type: 'wrong', word: finalSavedWord, expected: targetWord });
                     }
 
                     screenInput.value = '';

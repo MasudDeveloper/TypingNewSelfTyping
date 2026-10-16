@@ -13,9 +13,11 @@ class TypingTestController extends Controller
     {
         // Check premium access
         $user = auth()->user();
-        $hasActiveSub = $user->subscription_expires_at && $user->subscription_expires_at > now();
         
-        if ($test->is_premium && !$hasActiveSub && $user->role === 'student') {
+        if ($test->is_premium && !$user->hasActiveSubscription() && $user->role === 'student') {
+            if ($user->institution_id && $user->institution && !$user->institution->isSubscriptionActive()) {
+                return redirect()->route('dashboard')->with('error', 'আপনার প্রতিষ্ঠান / কোচিং সেন্টারের সাবস্ক্রিপশন মেয়াদ উত্তীর্ণ হয়ে গেছে। অনুগ্রহ করে প্রতিষ্ঠানে যোগাযোগ করুন।');
+            }
             return redirect()->route('packages.index')->with('error', 'এই ল্যাবটি অ্যাক্সেস করতে অনুগ্রহ করে একটি সাবস্ক্রিপশন প্যাকেজ চালু করুন।');
         }
 
@@ -84,7 +86,13 @@ class TypingTestController extends Controller
 
             $omittedWords = 0;
             $extraWords = 0;
-            $evaluationDetails = null;
+            
+            // Parse screen mode history tokens if provided from client
+            $evaluationDetails = $request->evaluation_details ? json_decode($request->evaluation_details, true) : null;
+            if (!$evaluationDetails && !empty($typedText)) {
+                $eval = $this->evaluateSheetMode($test->content, $typedText, $timeMinutes);
+                $evaluationDetails = $eval['diff'];
+            }
         }
 
         // BCC & Govt Standard Pass/Fail Criteria:
@@ -134,6 +142,28 @@ class TypingTestController extends Controller
         return view('student.result', compact('result'));
     }
 
+    private function wordsMatch(string $w1, string $w2): bool
+    {
+        $clean1 = preg_replace('/[।,.:;?!"\'‘’“”()]/u', '', trim($w1));
+        $clean2 = preg_replace('/[।,.:;?!"\'‘’“”()]/u', '', trim($w2));
+
+        if ($clean1 === $clean2) {
+            return true;
+        }
+
+        $norm1 = \App\Services\BijoyConverter::normalizeBengali($clean1);
+        $norm2 = \App\Services\BijoyConverter::normalizeBengali($clean2);
+        if ($norm1 === $norm2) {
+            return true;
+        }
+
+        // Try converting Bijoy Classic to Unicode
+        $conv1 = \App\Services\BijoyConverter::convert($clean1);
+        $conv2 = \App\Services\BijoyConverter::convert($clean2);
+
+        return ($conv1 === $conv2 || $conv1 === $clean2 || $clean1 === $conv2 || $conv1 === $norm2 || $norm1 === $conv2);
+    }
+
     /**
      * Government / BCC Standard Full Passage Diff Algorithm for Sheet Mode
      */
@@ -158,17 +188,17 @@ class TypingTestController extends Controller
             $mWord = $masterWords[$mIdx];
             $tWord = $typedWords[$tIdx];
 
-            if ($mWord === $tWord) {
-                // Exact match
+            if ($this->wordsMatch($mWord, $tWord)) {
+                // Exact / Normalized match
                 $correctCount++;
                 $diffTokens[] = ['type' => 'correct', 'word' => $tWord];
                 $mIdx++;
                 $tIdx++;
             } else {
                 // Check if next typed word matches current master word (extra word typed)
-                $nextTypedMatches = ($tIdx + 1 < $totalTypedWords && $typedWords[$tIdx + 1] === $mWord);
+                $nextTypedMatches = ($tIdx + 1 < $totalTypedWords && $this->wordsMatch($masterWords[$mIdx], $typedWords[$tIdx + 1]));
                 // Check if next master word matches current typed word (omitted word)
-                $nextMasterMatches = ($mIdx + 1 < $totalMasterWords && $masterWords[$mIdx + 1] === $tWord);
+                $nextMasterMatches = ($mIdx + 1 < $totalMasterWords && $this->wordsMatch($masterWords[$mIdx + 1], $typedWords[$tIdx]));
 
                 if ($nextTypedMatches) {
                     $extraCount++;

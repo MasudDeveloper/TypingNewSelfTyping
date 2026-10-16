@@ -10,7 +10,8 @@ Route::get('/', function () {
     $packages = \App\Models\Package::where('is_active', true)->get();
     $totalTests = \App\Models\TypingTest::count();
     $totalStudents = \App\Models\User::where('role', 'student')->count();
-    return view('welcome', compact('packages', 'totalTests', 'totalStudents'));
+    $books = \App\Models\Book::where('is_active', true)->orderBy('sort_order', 'asc')->get();
+    return view('welcome', compact('packages', 'totalTests', 'totalStudents', 'books'));
 });
 
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
@@ -48,17 +49,58 @@ Route::middleware('auth')->group(function () {
     // SuperAdmin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('dashboard');
+        
+        // Android Gateway & Recharge Management
+        Route::get('/gateway', [\App\Http\Controllers\SuperAdminController::class, 'gatewayIndex'])->name('gateway.index');
         Route::post('/recharge/{transaction}/approve', [\App\Http\Controllers\SuperAdminController::class, 'approveRecharge'])->name('recharge.approve');
         Route::post('/recharge/{transaction}/reject', [\App\Http\Controllers\SuperAdminController::class, 'rejectRecharge'])->name('recharge.reject');
+
+        // Typing Tests & Question Bank
+        Route::get('/tests', [\App\Http\Controllers\SuperAdminController::class, 'testsIndex'])->name('tests.index');
         Route::post('/tests', [\App\Http\Controllers\SuperAdminController::class, 'storeTest'])->name('tests.store');
         Route::delete('/tests/{test}', [\App\Http\Controllers\SuperAdminController::class, 'destroyTest'])->name('tests.destroy');
+
+        // Packages Management
+        Route::get('/packages', [\App\Http\Controllers\SuperAdminController::class, 'packagesIndex'])->name('packages.index');
+
+        // Book Management Routes
+        Route::get('/books', [\App\Http\Controllers\SuperAdminController::class, 'booksIndex'])->name('books.index');
+        Route::post('/books', [\App\Http\Controllers\SuperAdminController::class, 'storeBook'])->name('books.store');
+        Route::delete('/books/{book}', [\App\Http\Controllers\SuperAdminController::class, 'destroyBook'])->name('books.destroy');
+
+        // Institution Sales & Package Management Routes
+        Route::get('/institutions', [\App\Http\Controllers\SuperAdminController::class, 'institutionsIndex'])->name('institutions.index');
+        Route::post('/institutions', [\App\Http\Controllers\SuperAdminController::class, 'storeInstitution'])->name('institutions.store');
+        Route::put('/institutions/{institution}', [\App\Http\Controllers\SuperAdminController::class, 'updateInstitutionSubscription'])->name('institutions.update');
     });
 
     // Institution Admin Routes
     Route::prefix('institution')->name('institution.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\InstitutionController::class, 'index'])->name('dashboard');
+        
+        // Students Management
+        Route::get('/students', [\App\Http\Controllers\InstitutionController::class, 'studentsIndex'])->name('students.index');
         Route::post('/students', [\App\Http\Controllers\InstitutionController::class, 'storeStudent'])->name('students.store');
+        Route::delete('/students/{user}', [\App\Http\Controllers\InstitutionController::class, 'destroyStudent'])->name('students.destroy');
+        
+        // Bulk Import & Export
+        Route::get('/import-export', [\App\Http\Controllers\InstitutionController::class, 'importExportIndex'])->name('students.importPage');
+        Route::post('/students/bulk-import', [\App\Http\Controllers\InstitutionController::class, 'bulkImportStudents'])->name('students.bulkImport');
+        Route::get('/students/export', [\App\Http\Controllers\InstitutionController::class, 'exportStudents'])->name('students.export');
+        
+        // Batches Management
+        Route::get('/batches', [\App\Http\Controllers\InstitutionController::class, 'batchesIndex'])->name('batches.index');
+        
+        // Custom Tests & Exam Module
+        Route::get('/tests', [\App\Http\Controllers\InstitutionController::class, 'testsIndex'])->name('tests.index');
         Route::post('/tests', [\App\Http\Controllers\InstitutionController::class, 'storeTest'])->name('tests.store');
+        Route::delete('/tests/{test}', [\App\Http\Controllers\InstitutionController::class, 'destroyTest'])->name('tests.destroy');
+
+        // Branding & Settings
+        Route::get('/settings', [\App\Http\Controllers\InstitutionController::class, 'settingsIndex'])->name('settings');
+        Route::post('/settings', [\App\Http\Controllers\InstitutionController::class, 'updateSettings'])->name('settings.update');
+        
+        // Batch Printable Report
         Route::get('/report', [\App\Http\Controllers\InstitutionController::class, 'batchReport'])->name('report');
     });
 });

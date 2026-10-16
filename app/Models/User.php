@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'role',
         'institution_id',
+        'batch_name',
+        'student_roll',
         'wallet_balance',
         'subscription_expires_at',
     ];
@@ -50,5 +52,27 @@ class User extends Authenticatable
             'password' => 'hashed',
             'subscription_expires_at' => 'datetime',
         ];
+    }
+
+    public function institution()
+    {
+        return $this->belongsTo(Institution::class, 'institution_id');
+    }
+
+    public function hasActiveSubscription(): bool
+    {
+        // If student is part of an institution, check institution subscription
+        if ($this->institution_id) {
+            $inst = $this->institution;
+            if ($inst && !$inst->isSubscriptionActive()) {
+                return false;
+            }
+        }
+
+        if ($this->subscription_expires_at && $this->subscription_expires_at > now()) {
+            return true;
+        }
+
+        return false;
     }
 }

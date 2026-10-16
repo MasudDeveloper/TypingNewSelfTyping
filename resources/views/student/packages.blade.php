@@ -18,24 +18,25 @@
     }
 
     .panel-card {
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        background: rgba(14, 21, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 2.2rem;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(14px);
     }
     .panel-card h3 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-dark);
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #ffffff;
         margin-bottom: 0.5rem;
         display: flex;
         align-items: center;
         gap: 8px;
     }
     .panel-subtitle {
-        font-size: 0.88rem;
-        color: var(--text-muted);
+        font-size: 0.9rem;
+        color: #94a3b8;
         margin-bottom: 1.5rem;
     }
 
@@ -47,82 +48,90 @@
         margin-bottom: 1.5rem;
     }
     .method-pill {
-        border: 1.5px solid var(--border);
-        border-radius: 10px;
-        padding: 10px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 12px 8px;
         text-align: center;
         cursor: pointer;
-        transition: all 0.2s;
-        background: #f8fafc;
+        transition: all 0.25s ease;
+        background: rgba(255, 255, 255, 0.03);
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 4px;
     }
-    .method-pill:hover { border-color: var(--primary); background: #eff6ff; }
+    .method-pill:hover { border-color: var(--primary); background: rgba(37, 99, 235, 0.1); }
     .method-pill.active {
         border-color: var(--primary);
-        background: #eff6ff;
-        box-shadow: 0 0 0 2px var(--primary);
+        background: rgba(37, 99, 235, 0.18);
+        box-shadow: 0 0 15px rgba(37, 99, 235, 0.3);
     }
-    .method-pill strong { font-size: 0.95rem; color: var(--text-dark); }
-    .method-pill span { font-size: 0.72rem; color: var(--text-muted); }
+    .method-pill strong { font-size: 0.95rem; color: #ffffff; }
+    .method-pill span { font-size: 0.72rem; color: #94a3b8; }
 
     .payment-instruction-box {
-        background: #f8fafc;
-        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: 12px;
         padding: 1.2rem;
         margin-bottom: 1.5rem;
         font-size: 0.9rem;
+        color: #cbd5e1;
     }
     .number-display {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: white;
-        border: 1px solid var(--border);
+        background: #090e1a;
+        border: 1px solid rgba(59, 130, 246, 0.3);
         border-radius: 8px;
-        padding: 8px 12px;
+        padding: 8px 14px;
         margin: 8px 0;
         font-weight: 700;
-        font-size: 1.1rem;
-        color: var(--primary);
+        font-size: 1.15rem;
+        color: #38bdf8;
         font-family: monospace;
     }
     .btn-copy {
-        background: #eff6ff;
-        color: var(--primary);
-        border: 1px solid #bfdbfe;
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 0.75rem;
         font-weight: 700;
         cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-copy:hover {
+        background: #38bdf8;
+        color: #090e1a;
     }
 
     .form-group { margin-bottom: 1.2rem; }
-    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: var(--text-dark); }
+    .form-group label { display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 6px; color: #cbd5e1; }
     .form-control {
         width: 100%;
         padding: 0.85rem 1rem;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
+        background: #090e1a;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #ffffff;
         font-size: 0.95rem;
         outline: none;
         transition: 0.2s;
     }
     .form-control:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.25);
     }
 
     .btn-recharge {
         width: 100%;
         padding: 0.9rem;
-        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+        background: linear-gradient(135deg, var(--primary), #1d4ed8);
         color: white;
-        border: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 10px;
         font-weight: 700;
         font-size: 1rem;
@@ -132,27 +141,31 @@
         justify-content: center;
         gap: 8px;
         transition: all 0.2s;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
     }
-    .btn-recharge:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-recharge:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(37,99,235,0.5); }
 
     /* Current Subscription & Balance Card */
     .wallet-status-card {
-        background: linear-gradient(135deg, #1e3a8a, #2563eb);
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.6), rgba(15, 23, 42, 0.9));
+        border: 1px solid rgba(59, 130, 246, 0.3);
         color: white;
-        border-radius: 16px;
-        padding: 2rem;
+        border-radius: 20px;
+        padding: 2.2rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }
     .wallet-header { display: flex; justify-content: space-between; align-items: flex-start; }
-    .wallet-header .label { font-size: 0.85rem; color: #bfdbfe; font-weight: 600; text-transform: uppercase; }
-    .wallet-balance-val { font-size: 3rem; font-weight: 800; font-family: monospace; line-height: 1; margin: 10px 0; }
+    .wallet-header .label { font-size: 0.85rem; color: #93c5fd; font-weight: 600; text-transform: uppercase; }
+    .wallet-balance-val { font-size: 3rem; font-weight: 800; font-family: monospace; line-height: 1; margin: 10px 0; color: #38bdf8; }
     
     .subscription-expiry-box {
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 10px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
         padding: 1rem;
         margin-top: 1rem;
     }
@@ -164,19 +177,24 @@
         gap: 1.5rem;
     }
     .package-card {
-        background: var(--bg-surface);
-        border: 1.5px solid var(--border);
-        border-radius: 16px;
+        background: rgba(14, 21, 38, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
         padding: 2rem;
         display: flex;
         flex-direction: column;
-        transition: all 0.2s;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
+        backdrop-filter: blur(14px);
     }
     .package-card:hover {
-        border-color: var(--primary);
-        box-shadow: 0 10px 25px -5px rgba(37,99,235,0.1);
+        border-color: rgba(59, 130, 246, 0.5);
+        box-shadow: 0 16px 35px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(37, 99, 235, 0.2);
         transform: translateY(-4px);
+    }
+    .package-card.featured {
+        border-color: rgba(59, 130, 246, 0.6);
+        background: linear-gradient(180deg, rgba(30, 58, 138, 0.25) 0%, rgba(14, 21, 38, 0.9) 100%);
     }
     .package-card.featured {
         border-color: var(--primary);

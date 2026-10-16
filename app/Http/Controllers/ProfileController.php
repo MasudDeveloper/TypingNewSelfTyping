@@ -16,9 +16,26 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+        $testResults = \App\Models\TestResult::where('user_id', $user->id)->with('typingTest')->latest()->get();
+        
+        $totalTestsTaken = $testResults->count();
+        $avgWpm = $totalTestsTaken > 0 ? round($testResults->avg('net_wpm'), 1) : 0;
+        $maxWpm = $totalTestsTaken > 0 ? round($testResults->max('net_wpm'), 1) : 0;
+        $avgAccuracy = $totalTestsTaken > 0 ? round($testResults->avg('accuracy'), 1) : 0;
+        $passedTests = $testResults->where('is_passed', true)->count();
+        
+        $recentResults = $testResults->take(5);
+
+        return view('profile.edit', compact(
+            'user',
+            'totalTestsTaken',
+            'avgWpm',
+            'maxWpm',
+            'avgAccuracy',
+            'passedTests',
+            'recentResults'
+        ));
     }
 
     /**

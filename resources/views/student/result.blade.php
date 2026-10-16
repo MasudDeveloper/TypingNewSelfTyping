@@ -468,33 +468,55 @@
                 </div>
             </div>
 
-            <!-- Sheet Mode Visual Diff Analysis (If available) -->
-            @if(!empty($result->evaluation_details))
+            <!-- Visual Side-by-Side Comparison & Error Analysis -->
+            @if(!empty($result->evaluation_details) || !empty($result->typed_text))
                 <div class="diff-container">
                     <div class="diff-header">
-                        <h4 style="font-size:1.05rem; font-weight:700; color:var(--text-dark);">
-                            <i class="ph-fill ph-magnifying-glass"></i> প্যাসেজ ভিত্তিক ভুল বিশ্লেষণ (Diff Analysis)
+                        <h4 style="font-size:1.1rem; font-weight:700; color:var(--text-dark); display:flex; align-items:center; gap:8px;">
+                            <i class="ph-fill ph-columns" style="color:var(--primary);"></i> মূল প্যাসেজ ও পরীক্ষার্থীর লেখার তুলনামূলক বিশ্লেষণ (Side-by-Side Review)
                         </h4>
                         <div class="diff-legend">
                             <div class="legend-item"><span class="legend-color" style="background:#10b981;"></span> সঠিক</div>
-                            <div class="legend-item"><span class="legend-color" style="background:#ef4444;"></span> ভুল/বানান ভুল</div>
+                            <div class="legend-item"><span class="legend-color" style="background:#ef4444;"></span> ভুল শব্দ</div>
                             <div class="legend-item"><span class="legend-color" style="background:#f59e0b;"></span> বাদ পড়া শব্দ</div>
                             <div class="legend-item"><span class="legend-color" style="background:#8b5cf6;"></span> অতিরিক্ত শব্দ</div>
                         </div>
                     </div>
 
-                    <div class="diff-body lang-{{ $result->typingTest->language }}">
-                        @foreach($result->evaluation_details as $token)
-                            @if($token['type'] === 'correct')
-                                <span class="token-correct">{{ $token['word'] }} </span>
-                            @elseif($token['type'] === 'wrong')
-                                <span class="token-wrong" title="Expected: {{ $token['expected'] ?? '' }}">{{ $token['word'] }} </span>
-                            @elseif($token['type'] === 'omitted')
-                                <span class="token-omitted" title="Missed word">[{{ $token['word'] }}] </span>
-                            @elseif($token['type'] === 'extra')
-                                <span class="token-extra" title="Extra word typed">{{ $token['word'] }} </span>
-                            @endif
-                        @endforeach
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; margin-top:1.2rem;">
+                        <!-- Left: Original Master Passage -->
+                        <div style="background:white; border:1px solid var(--border); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="font-size:0.85rem; font-weight:800; color:#2563eb; text-transform:uppercase; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                <i class="ph-fill ph-file-text"></i> মূল প্রশ্নপত্র প্যাসেজ (Expected Passage)
+                            </div>
+                            <div class="lang-{{ $result->typingTest->language }}" style="line-height:2.2; font-size:1.25rem; color:#1e293b; text-align:left; word-spacing:2px;">
+                                {!! nl2br(e(trim($result->typingTest->content))) !!}
+                            </div>
+                        </div>
+
+                        <!-- Right: Student Typed Passage with Highlighting -->
+                        <div style="background:white; border:1px solid var(--border); border-radius:14px; padding:1.5rem; display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                            <div style="font-size:0.85rem; font-weight:800; color:#059669; text-transform:uppercase; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                <i class="ph-fill ph-pencil-line"></i> পরীক্ষার্থীর টাইপকৃত খাতা ও ভুল চিহ্নিতকরণ (Candidate Output)
+                            </div>
+                            <div class="diff-body lang-{{ $result->typingTest->language }}" style="border:none; padding:0; line-height:2.2; font-size:1.25rem; text-align:left; word-spacing:2px;">
+                                @if(!empty($result->evaluation_details))
+                                    @foreach($result->evaluation_details as $token)
+                                        @if($token['type'] === 'correct')
+                                            <span class="token-correct">{{ $token['word'] }} </span>
+                                        @elseif($token['type'] === 'wrong')
+                                            <span class="token-wrong" title="আসল শব্দ: {{ $token['expected'] ?? '' }}">{{ $token['word'] }}@if(!empty($token['expected']))<small style="font-size:0.75em; color:#64748b; text-decoration:none; display:inline-block; margin-left:3px; background:#fff; padding:0 3px; border-radius:3px; border:1px solid #fca5a5;">(সঠিক: {{ $token['expected'] }})</small>@endif </span>
+                                        @elseif($token['type'] === 'omitted')
+                                            <span class="token-omitted" title="শব্দটি বাদ পড়েছে">[{{ $token['word'] }}] </span>
+                                        @elseif($token['type'] === 'extra')
+                                            <span class="token-extra" title="অতিরিক্ত লেখা হয়েছে">{{ $token['word'] }} </span>
+                                        @endif
+                                    @endforeach
+                                @else
+                                    <span style="color:#64748b;">{{ $result->typed_text }}</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endif
