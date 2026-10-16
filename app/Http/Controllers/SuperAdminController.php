@@ -219,6 +219,39 @@ class SuperAdminController extends Controller
     }
 
     /**
+     * Actions: Update Test
+     */
+    public function updateTest(Request $request, TypingTest $test)
+    {
+        $this->checkSuperAdmin();
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|string',
+            'language' => 'required|in:en,bn_unicode,bn_bijoy',
+            'mode' => 'required|in:screen,sheet',
+            'time_limit_minutes' => 'required|integer|min:1|max:30',
+            'pass_wpm' => 'required|integer|min:10|max:100',
+            'content' => 'required|string',
+            'is_premium' => 'nullable|boolean',
+        ]);
+
+        $test->update([
+            'title' => $request->title,
+            'category' => $request->category,
+            'language' => $request->language,
+            'mode' => $request->mode,
+            'time_limit_minutes' => $request->time_limit_minutes,
+            'pass_wpm' => $request->pass_wpm,
+            'content' => $request->content,
+            'is_premium' => $request->has('is_premium'),
+            'backspace_allowed' => $request->has('backspace_allowed') ? true : false,
+        ]);
+
+        return back()->with('success', 'টেস্টটি সফলভাবে আপডেট করা হয়েছে!');
+    }
+
+    /**
      * Actions: Destroy Test
      */
     public function destroyTest(TypingTest $test)

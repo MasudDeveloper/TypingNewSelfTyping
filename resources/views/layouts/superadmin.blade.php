@@ -367,7 +367,72 @@
             gap: 12px;
         }
         .alert-success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; }
-        .alert-error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; }
+        /* Cyber Dark Pagination Styles */
+        nav[aria-label="Pagination Navigation"],
+        .pagination,
+        nav .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: 0;
+            padding: 0.5rem 0;
+            list-style: none;
+        }
+        .pagination .page-item,
+        .page-item {
+            display: inline-block;
+        }
+        .pagination .page-link,
+        .page-link,
+        nav[aria-label="Pagination Navigation"] a,
+        nav[aria-label="Pagination Navigation"] span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .pagination .page-link:hover,
+        nav[aria-label="Pagination Navigation"] a:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary-light);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .pagination .page-item.active .page-link,
+        .page-item.active .page-link,
+        nav[aria-label="Pagination Navigation"] span[aria-current="page"] {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+        .pagination .page-item.disabled .page-link,
+        .page-item.disabled .page-link,
+        nav[aria-label="Pagination Navigation"] span:not([aria-current="page"]) {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.02);
+            border-color: var(--border);
+            color: var(--text-muted);
+        }
+        /* Hide large default SVG in raw pagination if any */
+        nav[aria-label="Pagination Navigation"] svg {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+        }
 
         @media (max-width: 1024px) {
             .form-grid { grid-template-columns: 1fr; }

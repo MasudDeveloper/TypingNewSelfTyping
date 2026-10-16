@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
         // Typing Tests & Question Bank
         Route::get('/tests', [\App\Http\Controllers\SuperAdminController::class, 'testsIndex'])->name('tests.index');
         Route::post('/tests', [\App\Http\Controllers\SuperAdminController::class, 'storeTest'])->name('tests.store');
+        Route::put('/tests/{test}', [\App\Http\Controllers\SuperAdminController::class, 'updateTest'])->name('tests.update');
         Route::delete('/tests/{test}', [\App\Http\Controllers\SuperAdminController::class, 'destroyTest'])->name('tests.destroy');
 
         // Packages Management
